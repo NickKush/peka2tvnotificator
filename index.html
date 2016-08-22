@@ -38,14 +38,10 @@
 
             <div style="clear: both;"></div>
             <div id="contMain">
-                <form method="post" action="#">
-                    <p class="lead">
-                        <label for="keys">Теги: </label>
-                    </p>
-
-                    <tags-input id="keys" ng-model="tags" min-length="3" placeholder="Введите теги" on-tag-removed="changedTags()" on-tag-added="changedTags()"></tags-input>
-
-                </form>
+                <p class="lead">
+                    <label for="keys">Теги: </label>
+                </p>
+                <tags-input id="keys" ng-model="tags" min-length="3" placeholder="Введите теги" on-tag-removed="changedTags()" on-tag-added="changedTags()"></tags-input>
             </div>
 
             <div style="padding-top:10px;">
