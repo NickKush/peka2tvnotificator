@@ -30,7 +30,6 @@ function setSmiles() {
 function processReplaces( message ) {
 
     if(smiles === undefined) {
-        console.log('set smiles');
         setSmiles();
     }
     var message = urlReplace(message);
@@ -73,14 +72,13 @@ function urlReplace(inputText) {
 
 
 function indexSc2Tv() {
-    console.log("indexing");
-    http.post("http://funstream.tv/api/content", {content: "stream", "type": "all", category: {slug: "top"}}).then(function(res){
+    // console.log("Indexing Sc2Tv");
+    http.post("https://funstream.tv/api/content", {content: "stream", "type": "all", category: {slug: "top"}}).then(function(res){
         for(key in res.data.content) {
             stream = res.data.content[key];
             if(stream.owner !== null && stream.slug !== null) {
                 if(channelsIndex[stream.owner.id] === undefined) {
                     channelsIndex[stream.owner.id] = stream.slug;
-                    console.log(stream.owner.id + ", " + stream.slug);
                 }
             }
         }
@@ -90,18 +88,16 @@ function indexSc2Tv() {
 }
 
 function getUrl(channel, chat) {
-    var result;
     if(channel == "main") {
-        result = "http://funstream.tv/chat/main";
+        return "http://funstream.tv/chat/main";
     }
     else {
         if(chat) {
-            result = "http://funstream.tv/" + getChannelName(getChannelId(channel));
+            return "http://funstream.tv/" + getChannelName(getChannelId(channel));
         } else {
-            result = "http://sc2tv.ru/" + channelsIndex[getChannelId(channel)];
+            return "http://sc2tv.ru/" + channelsIndex[getChannelId(channel)];
         }
     }
-    return result;
 }
 
 function getChannelName(id) {
@@ -109,13 +105,13 @@ function getChannelName(id) {
 }
 
 function getUserId(uname) {
-    http.post("http://funstream.tv/api/user", {"id" : null, "name": uname}).then(function(res) {
+    http.post("https://funstream.tv/api/user", {"id" : null, "name": uname}).then(function(res) {
         return res.data["id"];
     });
 }
 
 function getUserName(uid) {
-    http.post("http://funstream.tv/api/user", {"id" : uid, "name": null}).then(function(res) {
+    http.post("https://funstream.tv/api/user", {"id" : uid, "name": null}).then(function(res) {
         return res.data["name"];
     });
 }

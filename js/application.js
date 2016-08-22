@@ -101,6 +101,7 @@ app.controller("general", function($scope, $http, $sce) {
            }
         }
 
+        console.log(Notification.permission);
         if(Notification.permission == "granted") {
             if ($scope.browserNotifications) {
                var notification = new Notification(jsonData.name, {
@@ -112,9 +113,9 @@ app.controller("general", function($scope, $http, $sce) {
                    notification.close();
                }, 10000);
 
-            //    notification.onclick = function () {
-            //        window.open(message.location);
-            //    }
+               notification.onclick = function () {
+                   window.open(jsonData.url);
+               }
            }
         }
 
