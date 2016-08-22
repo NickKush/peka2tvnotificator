@@ -28,10 +28,6 @@ function setSmiles() {
 }
 
 function processReplaces( message ) {
-
-    if(smiles === undefined) {
-        setSmiles();
-    }
     var message = urlReplace(message);
 
     message = message.replace( /:([-a-z0-9]{2,}):/gi, function( match, code ) {
@@ -95,7 +91,7 @@ function getUrl(channel, chat) {
         if(chat) {
             return "http://funstream.tv/" + getChannelName(getChannelId(channel));
         } else {
-            return "http://sc2tv.ru/" + channelsIndex[getChannelId(channel)];
+            return "http://sc2tv.ru/" + "channel/" + channelsIndex[getChannelId(channel)];
         }
     }
 }
@@ -105,15 +101,15 @@ function getChannelName(id) {
 }
 
 function getUserId(uname) {
-    http.post("https://funstream.tv/api/user", {"id" : null, "name": uname}).then(function(res) {
-        return res.data["id"];
-    });
+    return $http.post("http://funstream.tv/api/user", {id: null, name: uname}).then(function(res) {
+        return res.res.data["id"];
+    }).catch(function(err) { console.log(err)});
 }
 
 function getUserName(uid) {
-    http.post("https://funstream.tv/api/user", {"id" : uid, "name": null}).then(function(res) {
+    return $http.post("http://funstream.tv/api/user", {id : uid, name: null}).then(function(res) {
         return res.data["name"];
-    });
+    }).catch(function(err) { console.log(err)});
 }
 
 function getChannelId(chan) {

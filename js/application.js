@@ -12,6 +12,7 @@ app.controller("general", function($scope, $http, $sce) {
 
     setHttp($http);
     indexSc2Tv();
+    setSmiles()
 
     var soundNotificationsCookie = Cookies.get("soundNotifications");
     var browserNotificationsCookie = Cookies.get("browserNotifications");
@@ -101,7 +102,6 @@ app.controller("general", function($scope, $http, $sce) {
            }
         }
 
-        console.log(Notification.permission);
         if(Notification.permission == "granted") {
             if ($scope.browserNotifications) {
                var notification = new Notification(jsonData.name, {
