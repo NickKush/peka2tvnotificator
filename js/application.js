@@ -1,5 +1,14 @@
 var app = angular.module('main', ['ngTagsInput']);
 
+var urlRegex = new RegExp('(https?:\/\/[^\\s\/$.?#].[^\\s,]*)', 'gi');
+var nicknameBoldPattern = new RegExp( '\\[b\\]([\\s\\S]+?)\\[/b\\]', 'gi');
+
+var channelsIndex = {};
+
+var smiles;
+var smilesCount;
+var smileHtmlReplacement = [];
+
 app.filter('reverse', function() {
     return function(items) {
         return items.slice().reverse();
@@ -9,10 +18,6 @@ app.filter('reverse', function() {
 app.controller("general", function($scope, $http, $sce) {
 
     $scope.mentions = [];
-
-    setHttp($http);
-    indexSc2Tv();
-    setSmiles()
 
     var soundNotificationsCookie = Cookies.get("soundNotifications");
     var browserNotificationsCookie = Cookies.get("browserNotifications");
@@ -44,6 +49,26 @@ app.controller("general", function($scope, $http, $sce) {
 
     $scope.tags = cookieTags;
 
+    $scope.changedTags = function() {
+
+        var tagArray = [];
+
+        for(key in $scope.tags) {
+            var tag = $scope.tags[key].text.toLowerCase();
+            tagArray.push(tag);
+        }
+
+        Cookies.set("tags", tagArray);
+    };
+
+    $scope.openSettings = function() {
+        $('#settingsModal').modal('show');
+    };
+
+    $(".switch").bootstrapSwitch({
+        size: 'mini'
+    });
+
     var websocket = function() {
         var socket = io('wss://chat.funstream.tv', {
             transports: ['websocket'],
@@ -58,6 +83,8 @@ app.controller("general", function($scope, $http, $sce) {
             console.log('socket connected');
             socket.emit('/chat/join', {channel: 'all'}, function(data) {
                 console.log('joined');
+                indexSc2Tv();
+                setSmiles();
             })
         });
 
@@ -94,7 +121,7 @@ app.controller("general", function($scope, $http, $sce) {
         var parsedHtml = $.parseHTML(processedText);
         var notificationImage;
 
-        jsonData.url = getUrl(jsonData.url, $scope.chatLocation);
+        setUrl(jsonData);
 
         for (var i = 0; i < parsedHtml.length; i++) {
            if (parsedHtml[i].className == "chat-smile") {
@@ -136,23 +163,97 @@ app.controller("general", function($scope, $http, $sce) {
 
     websocket();
 
-    $scope.changedTags = function() {
+    function setSmiles() {
+        $.post('https://funstream.tv/api/smile', function(data) {
+            smiles = data;
+            smilesCount = smiles.length;
+            for( i = 0; i < smilesCount; i++ ) {
+                smileHtmlReplacement[i] =
+                    '<img src="' + smiles[i].url +
+                    '" width="' + smiles[i].width +
+                    '" height="' + smiles[i].height +
+                    '" class="chat-smile"/>';
+            }
+        });
+    }
 
-        var tagArray = [];
+    function processReplaces( message ) {
+        var message = urlReplace(message);
 
-        for(key in $scope.tags) {
-            var tag = $scope.tags[key].text.toLowerCase();
-            tagArray.push(tag);
+        message = message.replace( /:([-a-z0-9]{2,}):/gi, function( match, code ) {
+            var indexOfSmileWithThatCode = -1;
+            for ( var i = 0; i < smilesCount; i++ ) {
+                if ( smiles[i].code == code ) {
+                    indexOfSmileWithThatCode = i;
+                    break;
+                }
+            };
+
+            var replace = '';
+            if (indexOfSmileWithThatCode != -1) {
+                replace = smileHtmlReplacement[indexOfSmileWithThatCode];
+            } else {
+                replace = match;
+            }
+            return replace;
+        });
+
+        return message;
+    }
+
+    function urlReplace(inputText) {
+        inputText = inputText.replace(urlRegex, function(url) {
+            if(url.length > 60) {
+                return '<a href="' + url + '" target="_blank">' + url.substr(0, 45) + '...' + url.slice(-15) + '</a>';
+            }
+            return '<a href="' + url + '" target="_blank">' + url + '</a>';
+        });
+
+        inputText = inputText.replace(nicknameBoldPattern, '<b>$1</b>' );
+        return inputText;
+    }
+
+    function indexSc2Tv() {
+        console.log("Indexing Sc2Tv");
+        $.post("https://funstream.tv/api/content", {content: "stream", "type": "all", category: {slug: "top"}}, function(data){
+            for(key in data.content) {
+                stream = data.content[key];
+                if(stream.owner !== null && stream.slug !== null) {
+                    if(channelsIndex[stream.owner.id] === undefined) {
+                        channelsIndex[stream.owner.id] = stream.slug;
+                    }
+                }
+            }
+        });
+        setTimeout(indexSc2Tv, 60000);
+    }
+
+    //Это называется гавнокод
+    //Люби его
+    function setUrl(json) {
+        if(json.url == "main") {
+            json.url = "http://funstream.tv/chat/main";
+            return;
         }
+        var c = channelsIndex[getChannelId(json.url)];
+        if($scope.chatLocation || c === undefined) {
+            setChannelName(json);
+        } else {
+            json.url = "http://sc2tv.ru/channel/" + c;
+        }
+    }
 
-        Cookies.set("tags", tagArray);
-    };
+    function setChannelName(json) {
+        var uid = getChannelId(json.url);
+        $.post("http://funstream.tv/api/user", JSON.stringify({id : parseInt(uid)}), function(data) {
+            var user = data['name'];
+            json.url = 'http://funstream.tv/stream/' + user;
+            $scope.$apply();
+        });
+    }
 
-    $scope.openSettings = function() {
-        $('#settingsModal').modal('show');
-    };
+    function getChannelId(chan) {
+        return chan.split('/')[1];
+    }
 
-    $(".switch").bootstrapSwitch({
-        size: 'mini'
-    });
 });
