@@ -103,7 +103,7 @@ app.controller("general", function($scope, $http, $sce) {
     function sendNotification(message) {
         var jsonData = {
             name: message.from.name,
-            message: message.to.name !== undefined ? '[b]' + message.to.name + '[/b], ' + message.text : message.text,
+            message: message.to !== null ? '[b]' + message.to.name + '[/b], ' + message.text : message.text,
             date: message.time,
             url: message.channel
         }
