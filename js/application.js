@@ -171,7 +171,7 @@ app.controller("general", function($scope, $http, $sce) {
 
     function setChannelName(json) {
         var uid = getChannelId(json.url);
-        $.post("http://funstream.tv/api/user", JSON.stringify({id : parseInt(uid)}), function(data) {
+        $.post("https://funstream.tv/api/user", JSON.stringify({id : parseInt(uid)}), function(data) {
             var user = data['name'];
             json.url = 'http://funstream.tv/stream/' + user;
             $scope.$apply();
