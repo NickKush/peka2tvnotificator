@@ -91,7 +91,8 @@ app.controller("general", function($scope, $http, $sce) {
         socket.on('/chat/message', function(message){
             for(key in $scope.tags) {
                 tag = $scope.tags[key].text.toLowerCase()
-                if(message.text.toLowerCase().indexOf(tag) !== -1) {
+                mes = message.to !== null ? '[b]' + message.to.name + '[/b], ' + message.text : message.text;
+                if(mes.toLowerCase().indexOf(tag) !== -1) {
                     console.log("Send Notification by tag: " + tag);
                     sendNotification(message);
                     return;
