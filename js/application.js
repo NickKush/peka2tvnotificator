@@ -143,8 +143,8 @@ app.controller("general", function($scope, $http, $sce) {
             jsonData
         );
 
-        // if ($scope.soundNotifications)
-        //     document.getElementById('soundalert').play();
+        if ($scope.soundNotifications)
+            document.getElementById('soundalert').play();
 
         $scope.$apply();
     }
