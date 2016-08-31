@@ -58,7 +58,7 @@ function urlReplace(inputText) {
 }
 
 function indexSc2Tv() {
-    console.log("Indexing Sc2Tv");
+    //console.log("Indexing Sc2Tv");
     $.post("https://funstream.tv/api/content", {content: "stream", "type": "all", category: {slug: "top"}}, function(data){
         for(key in data.content) {
             stream = data.content[key];

@@ -93,7 +93,7 @@ app.controller("general", function($scope, $http, $sce) {
                 tag = $scope.tags[key].text.toLowerCase()
                 mes = message.to !== null ? '[b]' + message.to.name + '[/b], ' + message.text : message.text;
                 if(mes.toLowerCase().indexOf(tag) !== -1) {
-                    console.log("Send Notification by tag: " + tag);
+                    //console.log("Send Notification by tag: " + tag);
                     sendNotification(message);
                     return;
                 }
