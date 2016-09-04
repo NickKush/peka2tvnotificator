@@ -90,15 +90,21 @@ app.controller("general", function($scope, $http, $sce) {
 
         socket.on('/chat/message', function(message){
             for(key in $scope.tags) {
-                tag = $scope.tags[key].text.toLowerCase()
-                mes = message.to !== null ? '[b]' + message.to.name + '[/b], ' + message.text : message.text;
-                if(mes.toLowerCase().indexOf(tag) !== -1) {
+                tag = $scope.tags[key].text.toLowerCase();
+                bMessage = message.to !== null ? '[b]' + message.to.name + '[/b], ' + message.text : message.text;
+                if(tagMather(tag, bMessage, message)) {
                     //console.log("Send Notification by tag: " + tag);
                     sendNotification(message);
                     return;
                 }
             }
         });
+    }
+
+    function tagMatcher(tag, currentMessage, message) {
+        return tag.lastIndexOf(":u:") !== -1 ?
+            message.from.name.toLowerCase().lastIndexOf(tag.replace(":u:", ""), 0) === 0 : //startWith
+            currentMessage.toLowerCase().indexOf(tag) !== -1; //contains
     }
 
     function sendNotification(message) {
