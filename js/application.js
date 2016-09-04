@@ -89,22 +89,54 @@ app.controller("general", function($scope, $http, $sce) {
         });
 
         socket.on('/chat/message', function(message){
+            var isContains = false;
+
             for(key in $scope.tags) {
-                tag = $scope.tags[key].text.toLowerCase();
-                bMessage = message.to !== null ? '[b]' + message.to.name + '[/b], ' + message.text : message.text;
-                if(tagMatcher(tag, bMessage, message)) {
-                    //console.log("Send Notification by tag: " + tag);
-                    sendNotification(message);
-                    return;
+
+                if(isContains) {
+                    break;
                 }
+
+                var tag = $scope.tags[key].text.toLowerCase();
+                var bMessage = message.to !== null ? '[b]' + message.to.name + '[/b], ' + message.text : message.text;
+
+                if(tag.lastIndexOf(":ui:") !== -1) {
+                    var nickName = message.from.name.toLowerCase();
+                    var re = new RegExp('\\b' + tag.replace(":ui:", "") + "\\b");
+                    if(nickName.search(re) !== -1) {
+                        isContains = false;
+                        return;
+                    }
+                    continue;
+                }
+
+                isContains = tagMatcher(tag, bMessage.toLowerCase(), message);
+            }
+
+            if(isContains) {
+                console.log("Send Notification");
+                sendNotification(message);
+                return;
             }
         });
     }
 
+    //Говнокода много не бывает
     function tagMatcher(tag, currentMessage, message) {
-        return tag.lastIndexOf(":u:") !== -1 ?
-            message.from.name.toLowerCase().lastIndexOf(tag.replace(":u:", ""), 0) === 0 : //startWith
-            currentMessage.toLowerCase().indexOf(tag) !== -1; //contains
+        if(tag.lastIndexOf(":") !== -1) {
+
+            var nickName = message.from.name.toLowerCase();
+            if(nickName.lastIndexOf(tag.replace(":u:", ""), 0) === 0) {
+                return true;
+            }
+
+            var re = new RegExp('\\b' + tag.replace(":i:", "") + "\\b");
+            if(currentMessage.search(re) !== -1) {
+                return false
+            }
+        }
+
+        return currentMessage.toLowerCase().indexOf(tag) !== -1;
     }
 
     function sendNotification(message) {
