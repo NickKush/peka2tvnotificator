@@ -92,7 +92,7 @@ app.controller("general", function($scope, $http, $sce) {
             for(key in $scope.tags) {
                 tag = $scope.tags[key].text.toLowerCase();
                 bMessage = message.to !== null ? '[b]' + message.to.name + '[/b], ' + message.text : message.text;
-                if(tagMather(tag, bMessage, message)) {
+                if(tagMatcher(tag, bMessage, message)) {
                     //console.log("Send Notification by tag: " + tag);
                     sendNotification(message);
                     return;
