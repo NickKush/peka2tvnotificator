@@ -40,17 +40,44 @@ app.controller("general", function($scope, $http, $sce) {
 
     $scope.tags = cookieTags;
 
-    $scope.changedTags = function() {
+    var sortedTags = [];
 
-        var tagArray = [];
+    $scope.changedTags = function() {
+        var tempArray = [];
+        sortedTags = [];
 
         for(key in $scope.tags) {
             var tag = $scope.tags[key].text.toLowerCase();
-            tagArray.push(tag);
+            tempArray.push(tag);
+            sortedTags.push(tag);
         }
 
-        Cookies.set("tags", tagArray);
+        sortedTags.sort(compareTags);
+
+        Cookies.set("tags", tempArray);
     };
+
+    //Сортируем теги для работы нашего велосипеда
+    //Кобра бы гордился мной
+    function compareTags(a, b) {
+        var sTag = ":";
+        if(a.lastIndexOf(sTag) !== -1 && b.lastIndexOf(sTag) === -1) {
+            return -1;
+        }
+        if(a.lastIndexOf(sTag) === -1 && b.lastIndexOf(sTag) !== -1) {
+            return 1;
+        }
+        if(a.lastIndexOf(sTag) !== -1 && b.lastIndexOf(sTag) !== -1) {
+            if(a.lastIndexOf(tagIgnoreUser) !== -1 && b.lastIndexOf(tagIgnoreUser) === -1) {
+                return -1;
+            }
+            if(a.lastIndexOf(tagIgnoreUser) === -1 && b.lastIndexOf(tagIgnoreUser) !== -1) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
 
     $scope.openSettings = function() {
         $('#settingsModal').modal('show');
@@ -89,20 +116,23 @@ app.controller("general", function($scope, $http, $sce) {
         });
 
         socket.on('/chat/message', function(message){
+
+            var mes = message.to !== null ? '[b]' + message.to.name + '[/b], ' + message.text : message.text;
+            mes = mes.toLowerCase();
+
             var isContains = false;
 
-            for(key in $scope.tags) {
+            for(key in sortedTags) {
 
                 if(isContains) {
                     break;
                 }
 
-                var tag = $scope.tags[key].text.toLowerCase();
-                var bMessage = message.to !== null ? '[b]' + message.to.name + '[/b], ' + message.text : message.text;
+                var tag = sortedTags[key].toLowerCase();
 
-                if(tag.lastIndexOf(":ui:") !== -1) {
+                if(tag.lastIndexOf(tagIgnoreUser) !== -1) {
                     var nickName = message.from.name.toLowerCase();
-                    var re = new RegExp('\\b' + tag.replace(":ui:", "") + "\\b");
+                    var re = new RegExp('\\b' + tag.replace(tagIgnoreUser, "") + "\\b");
                     if(nickName.search(re) !== -1) {
                         isContains = false;
                         return;
@@ -110,33 +140,34 @@ app.controller("general", function($scope, $http, $sce) {
                     continue;
                 }
 
-                isContains = tagMatcher(tag, bMessage.toLowerCase(), message);
+                if(tag.lastIndexOf(tagIgnore) !== -1) {
+                    var re = new RegExp('\\b' + tag.replace(tagIgnore, "") + "\\b");
+                    if(mes.search(re) !== -1) {
+                        isContains = false;
+                        mes = mes.replace(re, "");
+                    }
+                    continue;
+                }
+
+                isContains = tagMatcher(tag, mes, message);
             }
 
             if(isContains) {
-                console.log("Send Notification");
+                //console.log("Send Notification");
                 sendNotification(message);
                 return;
             }
         });
     }
 
-    //Говнокода много не бывает
+    var tagUsername = ":u:";
+    var tagIgnore = ":i:";
+    var tagIgnoreUser = ":ui:";
+
     function tagMatcher(tag, currentMessage, message) {
-        if(tag.lastIndexOf(":") !== -1) {
-
-            var nickName = message.from.name.toLowerCase();
-            if(nickName.lastIndexOf(tag.replace(":u:", ""), 0) === 0) {
-                return true;
-            }
-
-            var re = new RegExp('\\b' + tag.replace(":i:", "") + "\\b");
-            if(currentMessage.search(re) !== -1) {
-                return false
-            }
-        }
-
-        return currentMessage.toLowerCase().indexOf(tag) !== -1;
+        return tag.lastIndexOf(tagUsername) !== -1 ?
+        message.from.name.toLowerCase().lastIndexOf(tag.replace(tagUsername, ""), 0) === 0 :
+        currentMessage.toLowerCase().indexOf(tag) !== -1;
     }
 
     function sendNotification(message) {
