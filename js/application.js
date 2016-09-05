@@ -40,17 +40,44 @@ app.controller("general", function($scope, $http, $sce) {
 
     $scope.tags = cookieTags;
 
-    $scope.changedTags = function() {
+    var sortedTags = [];
 
-        var tagArray = [];
+    $scope.changedTags = function() {
+        var tempArray = [];
+        sortedTags = [];
 
         for(key in $scope.tags) {
             var tag = $scope.tags[key].text.toLowerCase();
-            tagArray.push(tag);
+            tempArray.push(tag);
+            sortedTags.push(tag);
         }
 
-        Cookies.set("tags", tagArray);
+        sortedTags.sort(compareTags);
+
+        Cookies.set("tags", tempArray);
     };
+
+    //Сортируем теги для работы нашего велосипеда
+    //Кобра бы гордился мной
+    function compareTags(a, b) {
+        var sTag = ":";
+        if(a.lastIndexOf(sTag) !== -1 && b.lastIndexOf(sTag) === -1) {
+            return -1;
+        }
+        if(a.lastIndexOf(sTag) === -1 && b.lastIndexOf(sTag) !== -1) {
+            return 1;
+        }
+        if(a.lastIndexOf(sTag) !== -1 && b.lastIndexOf(sTag) !== -1) {
+            if(a.lastIndexOf(tagIgnoreUser) !== -1 && b.lastIndexOf(tagIgnoreUser) === -1) {
+                return -1;
+            }
+            if(a.lastIndexOf(tagIgnoreUser) === -1 && b.lastIndexOf(tagIgnoreUser) !== -1) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
 
     $scope.openSettings = function() {
         $('#settingsModal').modal('show');
@@ -89,16 +116,58 @@ app.controller("general", function($scope, $http, $sce) {
         });
 
         socket.on('/chat/message', function(message){
-            for(key in $scope.tags) {
-                tag = $scope.tags[key].text.toLowerCase()
-                mes = message.to !== null ? '[b]' + message.to.name + '[/b], ' + message.text : message.text;
-                if(mes.toLowerCase().indexOf(tag) !== -1) {
-                    //console.log("Send Notification by tag: " + tag);
-                    sendNotification(message);
-                    return;
+
+            var mes = message.to !== null ? '[b]' + message.to.name + '[/b], ' + message.text : message.text;
+            mes = mes.toLowerCase();
+
+            var isContains = false;
+
+            for(key in sortedTags) {
+
+                if(isContains) {
+                    break;
                 }
+
+                var tag = sortedTags[key].toLowerCase();
+
+                if(tag.lastIndexOf(tagIgnoreUser) !== -1) {
+                    var nickName = message.from.name.toLowerCase();
+                    var re = new RegExp('\\b' + tag.replace(tagIgnoreUser, "") + "\\b");
+                    if(nickName.search(re) !== -1) {
+                        isContains = false;
+                        return;
+                    }
+                    continue;
+                }
+
+                if(tag.lastIndexOf(tagIgnore) !== -1) {
+                    var re = new RegExp('\\b' + tag.replace(tagIgnore, "") + "\\b");
+                    if(mes.search(re) !== -1) {
+                        isContains = false;
+                        mes = mes.replace(re, "");
+                    }
+                    continue;
+                }
+
+                isContains = tagMatcher(tag, mes, message);
+            }
+
+            if(isContains) {
+                //console.log("Send Notification");
+                sendNotification(message);
+                return;
             }
         });
+    }
+
+    var tagUsername = ":u:";
+    var tagIgnore = ":i:";
+    var tagIgnoreUser = ":ui:";
+
+    function tagMatcher(tag, currentMessage, message) {
+        return tag.lastIndexOf(tagUsername) !== -1 ?
+        message.from.name.toLowerCase().lastIndexOf(tag.replace(tagUsername, ""), 0) === 0 :
+        currentMessage.toLowerCase().indexOf(tag) !== -1;
     }
 
     function sendNotification(message) {
