@@ -40,21 +40,17 @@ app.controller("general", function($scope, $http, $sce) {
 
     $scope.tags = cookieTags;
 
-    var sortedTags = [];
-
     $scope.changedTags = function() {
-        var tempArray = [];
-        sortedTags = [];
+        cookieTags = [];
 
         for(key in $scope.tags) {
             var tag = $scope.tags[key].text.toLowerCase();
-            tempArray.push(tag);
-            sortedTags.push(tag);
+            cookieTags.push(tag);
         }
 
-        sortedTags.sort(compareTags);
+        cookieTags.sort(compareTags);
 
-        Cookies.set("tags", tempArray);
+        Cookies.set("tags", cookieTags);
     };
 
     //Сортируем теги для работы нашего велосипеда
@@ -122,13 +118,13 @@ app.controller("general", function($scope, $http, $sce) {
 
             var isContains = false;
 
-            for(key in sortedTags) {
+            for(key in cookieTags) {
 
                 if(isContains) {
                     break;
                 }
 
-                var tag = sortedTags[key].toLowerCase();
+                var tag = cookieTags[key].text.toLowerCase();
 
                 if(tag.lastIndexOf(tagIgnoreUser) !== -1) {
                     var nickName = message.from.name.toLowerCase();
