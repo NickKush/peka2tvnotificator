@@ -10,9 +10,9 @@ app.controller("general", function($scope, $http, $sce) {
 
     $scope.mentions = [];
 
-    var soundNotificationsCookie = Cookies.get("soundNotifications");
-    var browserNotificationsCookie = Cookies.get("browserNotifications");
-    var chatLocationCookie = Cookies.get("chatLocation");
+    var soundNotificationsCookie = localStorage.getItem("soundNotifications");
+    var browserNotificationsCookie = localStorage.getItem("browserNotifications");
+    var chatLocationCookie = localStorage.getItem("chatLocation");
 
     $scope.soundNotifications = soundNotificationsCookie == undefined ? true : (soundNotificationsCookie == "true");
     $scope.browserNotifications = browserNotificationsCookie == undefined ? true : (browserNotificationsCookie == "true");
@@ -20,54 +20,50 @@ app.controller("general", function($scope, $http, $sce) {
 
     $('#switchSound').attr('checked', $scope.soundNotifications).on('switchChange.bootstrapSwitch', function(event, state) {
         $scope.soundNotifications = state;
-        Cookies.set('soundNotifications', state);
+        localStorage.setItem('soundNotifications', state);
     });
 
     $('#switchBrowserNotification').attr('checked', $scope.browserNotifications).on('switchChange.bootstrapSwitch', function(event, state) {
         $scope.browserNotifications = state;
-        Cookies.set('browserNotifications', state);
+        localStorage.setItem('browserNotifications', state);
     });
 
     $('#switchChatLocation').attr('checked', $scope.chatLocation).on('switchChange.bootstrapSwitch', function(event, state) {
         $scope.chatLocation = state;
-        Cookies.set('chatLocation', state);
+        localStorage.setItem('chatLocation', state);
     });
 
-    var cookieTags = Cookies.getJSON('tags');
+    var localTags = JSON.parse(localStorage.getItem('tags'));
 
-    if(cookieTags == undefined)
-        cookieTags = [];
+    if(localTags == undefined)
+        localTags = [];
 
-    $scope.tags = cookieTags;
+    $scope.tags = localTags;
 
     $scope.changedTags = function() {
-        cookieTags = [];
+        localStorage.setItem("tags", JSON.stringify($scope.tags));
+        localTags = JSON.parse(localStorage.getItem('tags'));
 
-        for(key in $scope.tags) {
-            var tag = $scope.tags[key].text.toLowerCase();
-            cookieTags.push(tag);
-        }
-
-        cookieTags.sort(compareTags);
-
-        Cookies.set("tags", cookieTags);
+        localTags.sort(compareTags);
     };
 
     //Сортируем теги для работы нашего велосипеда
     //Кобра бы гордился мной
+    //Временный велосипед
+    //Когда не будет лень переделаю всё к херам
     function compareTags(a, b) {
         var sTag = ":";
-        if(a.lastIndexOf(sTag) !== -1 && b.lastIndexOf(sTag) === -1) {
+        if(a.text.lastIndexOf(sTag) !== -1 && b.text.lastIndexOf(sTag) === -1) {
             return -1;
         }
-        if(a.lastIndexOf(sTag) === -1 && b.lastIndexOf(sTag) !== -1) {
+        if(a.text.lastIndexOf(sTag) === -1 && b.text.lastIndexOf(sTag) !== -1) {
             return 1;
         }
-        if(a.lastIndexOf(sTag) !== -1 && b.lastIndexOf(sTag) !== -1) {
-            if(a.lastIndexOf(tagIgnoreUser) !== -1 && b.lastIndexOf(tagIgnoreUser) === -1) {
+        if(a.text.lastIndexOf(sTag) !== -1 && b.text.lastIndexOf(sTag) !== -1) {
+            if(a.text.lastIndexOf(tagIgnoreUser) !== -1 && b.text.lastIndexOf(tagIgnoreUser) === -1) {
                 return -1;
             }
-            if(a.lastIndexOf(tagIgnoreUser) === -1 && b.lastIndexOf(tagIgnoreUser) !== -1) {
+            if(a.text.lastIndexOf(tagIgnoreUser) === -1 && b.text.lastIndexOf(tagIgnoreUser) !== -1) {
                 return 1;
             }
         }
@@ -118,13 +114,13 @@ app.controller("general", function($scope, $http, $sce) {
 
             var isContains = false;
 
-            for(key in cookieTags) {
+            for(key in localTags) {
 
                 if(isContains) {
                     break;
                 }
 
-                var tag = cookieTags[key].text.toLowerCase();
+                var tag = localTags[key].text.toLowerCase();
 
                 if(tag.lastIndexOf(tagIgnoreUser) !== -1) {
                     var nickName = message.from.name.toLowerCase();
