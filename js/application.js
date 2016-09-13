@@ -41,14 +41,12 @@ app.controller("general", function($scope, $http, $sce) {
     $scope.tags = localTags;
 
     $scope.changedTags = function() {
-        localStorage.setItem("tags", JSON.stringify($scope.tags));
-        localTags = JSON.parse(localStorage.getItem('tags'));
-
+        localTags = $scope.tags;
         localTags.sort(compareTags);
+        localStorage.setItem("tags", JSON.stringify(localTags));
     };
 
     //Сортируем теги для работы нашего велосипеда
-    //Кобра бы гордился мной
     //Временный велосипед
     //Когда не будет лень переделаю всё к херам
     function compareTags(a, b) {
@@ -67,7 +65,6 @@ app.controller("general", function($scope, $http, $sce) {
                 return 1;
             }
         }
-
         return 0;
     }
 
@@ -116,12 +113,11 @@ app.controller("general", function($scope, $http, $sce) {
 
             for(key in localTags) {
 
-                if(isContains) {
+                if(isContains)
                     break;
-                }
 
                 var tag = localTags[key].text.toLowerCase();
-
+                
                 if(tag.lastIndexOf(tagIgnoreUser) !== -1) {
                     var nickName = message.from.name.toLowerCase();
                     var re = new RegExp('\\b' + tag.replace(tagIgnoreUser, "") + "\\b");
