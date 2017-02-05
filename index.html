@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title>Упоминания на Sc2tv</title>
+        <title>Упоминания на peka2tv</title>
 
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css" />
@@ -19,8 +19,8 @@
         <script src="js/libs/bootstrap-switch.min.js"></script>
         <script src="js/libs/ng-tags-input.min.js" type="text/javascript"></script>
 
-        <script src="js/sc2tv.js" type="text/javascript"></script>
-        <script src="js/application.js" type="text/javascript"></script>
+        <script src="js/pekatv.js" type="text/javascript"></script>
+        <script src="js/app.js" type="text/javascript"></script>
 
         <script src="https://cdn.socket.io/socket.io-1.3.5.js" type="text/javascript"></script>
     </head>
@@ -29,7 +29,7 @@
         <div class="container" ng-controller="general">
 
             <div>
-                <div id="headEl"><h1>Sc2tv.ru нотификатор</h1></div>
+                <div id="headEl"><h1>peka2.tv нотификатор</h1></div>
                 <img src="img/Black_Settings.png" id="settings" ng-click="openSettings()" />
             </div>
 
@@ -60,14 +60,14 @@
         <footer class="footer">
             <div class="container">
                 <p class="text-muted">
-                    <a href="https://github.com/Hukutoss/sc2tvnotificator-js" target="_blank">Hukutoss (c) 2016 v0.4.2</a>
+                    <a href="https://github.com/Hukutoss/peka2tvnotificator" target="_blank">Hukutoss (c) 2017 v0.5.0</a>
                 </p>
             </div>
         </footer>
 
         <audio id="soundalert" preload="auto" style="display: none;">
-            <source src="https://raw.githubusercontent.com/Hukutoss/sc2tvnotificator-js/master/snd/sound.ogg" type="audio/ogg" />
-            <source src="https://raw.githubusercontent.com/Hukutoss/sc2tvnotificator-js/master/snd/sound.mp3" type="audio/mpeg" />
+            <source src="https://raw.githubusercontent.com/Hukutoss/peka2tvnotificator/master/snd/sound.ogg" type="audio/ogg" />
+            <source src="https://raw.githubusercontent.com/Hukutoss/peka2tvnotificator/master/snd/sound.mp3" type="audio/mpeg" />
         </audio>
 
         <div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -86,10 +86,6 @@
                             <tr>
                                 <td>Нотификация в браузере: </td>
                                 <td><input id="switchBrowserNotification" class="switch" type="checkbox" checked></td>
-                            </tr>
-                            <tr>
-                                <td>Использовать чат Funstream: </td>
-                                <td><input id="switchChatLocation" class="switch" type="checkbox" checked data-on-text="Yes" data-off-text="No"></td>
                             </tr>
                         </table>
                     </div>
