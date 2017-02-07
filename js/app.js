@@ -228,10 +228,8 @@ app.controller("general", function($scope, $http, $sce) {
     //Передаю привет кто пытается посмотреть мой гавнокод
     //FRAG PIDOR
 
-    //comments/article/45
-    //api/article/get { id: 123 ]
     function setArticleUrl(json) {
-        var aid = getArticleId(json.url);
+        var aid = getId(json.url);
         $.post(siteUrl + '/api/article/get', JSON.stringify({id : parseInt(aid)}), function(data) {
             var atricleSlug = data['slug'];
             json.url = 'http://peka2.tv' + atricleSlug;
@@ -240,7 +238,7 @@ app.controller("general", function($scope, $http, $sce) {
     }
 
     function setChannelUrl(json) {
-        var uid = getChannelId(json.url);
+        var uid = getId(json.url);
         $.post(siteUrl + '/api/user', JSON.stringify({id : parseInt(uid)}), function(data) {
             var channelSlug = data['slug'];
             json.url = 'http://peka2.tv/' + channelSlug;
@@ -248,11 +246,7 @@ app.controller("general", function($scope, $http, $sce) {
         });
     }
 
-    function getChannelId(channel) {
-        return channel.split('/')[1];
-    }
-
-    function getArticleId(channel) {
-        return channel.split('/')[2];
+    function getId(channel) {
+        return channel.split('/').pop();
     }
 });
