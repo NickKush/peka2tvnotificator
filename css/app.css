@@ -37,6 +37,11 @@ hr {
     margin-right: 8px;
 }
 
+#logo {
+    float: left;
+    margin-top: 23px;
+}
+
 #headEl {
     float: left;
     width: 420px;
