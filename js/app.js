@@ -1,6 +1,6 @@
 var app = angular.module('main', ['ngTagsInput']);
 
-var siteUrl = 'https://peka2.tv';
+var siteUrl = 'https://sc2tv.ru';
 
 app.filter('reverse', function() {
     return function(items) {
@@ -72,7 +72,7 @@ app.controller("general", function($scope, $http, $sce) {
     });
 
     var websocket = function() {
-        var socket = io('wss://chat.peka2.tv', {
+        var socket = io('wss://chat.sc2tv.ru', {
             transports: ['websocket'],
             path: '/',
             reconnection: true,
@@ -160,8 +160,6 @@ app.controller("general", function($scope, $http, $sce) {
             url: message.channel
         }
 
-        // console.log(message);
-
         var processedText = pekatv.messageReplaces(jsonData.message);
         var parsedHtml = $.parseHTML(processedText);
         var notificationImage;
@@ -208,11 +206,9 @@ app.controller("general", function($scope, $http, $sce) {
 
     websocket();
 
-    //Это называется гавнокод
-    //Люби его
     function getUrl(json) {
         if(json.url === "main") {
-            json.url = "http://peka2.tv/main/chat";
+            json.url = "http://sc2tv.ru/main/chat";
             return;
         }
 
@@ -225,14 +221,11 @@ app.controller("general", function($scope, $http, $sce) {
         return;
     }
 
-    //Передаю привет кто пытается посмотреть мой гавнокод
-    //FRAG PIDOR
-
     function setArticleUrl(json) {
         var aid = getId(json.url);
         $.post(siteUrl + '/api/article/get', JSON.stringify({id : parseInt(aid)}), function(data) {
             var atricleSlug = data['slug'];
-            json.url = 'http://peka2.tv' + atricleSlug;
+            json.url = 'http://sc2tv.ru' + atricleSlug;
             $scope.$apply();
         });
     }
@@ -241,7 +234,7 @@ app.controller("general", function($scope, $http, $sce) {
         var uid = getId(json.url);
         $.post(siteUrl + '/api/user', JSON.stringify({id : parseInt(uid)}), function(data) {
             var channelSlug = data['slug'];
-            json.url = 'http://peka2.tv/' + channelSlug;
+            json.url = 'http://sc2tv.ru/' + channelSlug;
             $scope.$apply();
         });
     }
